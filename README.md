@@ -1,8 +1,8 @@
 # CPC-SAM for Kvasir Polyp Segmentation
 
-> **CPC-SAM을 ACDC 심장 분할에서 Kvasir 폴립 분할로 적용한 프로젝트**
+> **CPC-SAM을 ACDC 심장 분할에서 Kvasir 용종 분할로 적용한 프로젝트**
 
-본 프로젝트는 [CPC-SAM (MICCAI 2024)](https://github.com/CPCXJTU/CPC-SAM)을 Kvasir-SEG 데이터셋에 적용하여 2D 폴립 분할을 수행합니다.
+본 프로젝트는 [CPC-SAM (MICCAI 2024)](https://github.com/CPCXJTU/CPC-SAM)을 Kvasir-SEG 데이터셋에 적용하여 2D 용종 분할을 수행합니다.
 
 ---
 
@@ -25,7 +25,7 @@
 
 | 항목 | ACDC | Kvasir |
 |------|------|--------|
-| **Task** | 3D 심장 분할 | 2D 폴립 분할 |
+| **Task** | 3D 심장 분할 | 2D 용종 분할 |
 | **Data Format** | `.h5` (HDF5) | `.png` |
 | **Classes** | 3 (RV, Myo, LV) | 1 (Polyp) |
 | **Image Size** | 256×256 | 256×256 |
@@ -421,7 +421,7 @@ pip install safetensors==0.3.1 --no-build-isolation
 ## 결과
 
 ### Dataset 정보
-- **Train**: 880 images (10% labeled = 88 images)
+- **Train**: 880 images
 - **Validation**: 120 images
 - **Test**: Validation set 사용
 
@@ -429,13 +429,41 @@ pip install safetensors==0.3.1 --no-build-isolation
 - **Epochs**: 300
 - **Batch Size**: 24
 - **Image Size**: 256×256
-- **Labeled Ratio**: 10%
 - **Learning Rate**: 0.001
 - **Method**: Semi-supervised (Dual Mask + Consistency)
 
 ### 예상 학습 시간
 - **이전 설정**: ~228일
 - **최적화 후**: ~10-15시간 ✅
+
+### 테스트 결과
+
+서로 다른 Labeled Data 비율로 학습한 모델의 성능 비교:
+
+| Labeled Ratio | Labeled Images | Dice Score | HD95 | 표준편차 (Dice) | 표준편차 (HD95) |
+|---------------|----------------|------------|------|----------------|----------------|
+| 10% | 88 images | 0.8399 | 56.39 | 0.2067 | 70.43 |
+| 15% | 132 images | 0.8446 | 52.32 | 0.2144 | 69.44 |
+| 20% | 176 images | **0.8687** | **43.67** | **0.2007** | **62.27** |
+
+#### 주요 발견사항
+
+1. **성능 향상 추이**
+   - 10% → 15%: Dice +0.47%, HD95 -4.07
+   - 15% → 20%: Dice +2.41%, HD95 -8.63
+   - 10% → 20%: Dice +2.88%, HD95 -12.72
+
+2. **Labeled Data 효율성**
+   - 라벨 데이터가 2배 증가(10%→20%)할 때 Dice Score는 2.88% 향상
+   - HD95(Hausdorff Distance)도 크게 개선되어 경계 정확도가 향상됨
+
+3. **Semi-Supervised Learning 효과**
+   - 10% 라벨로도 Dice 0.8399 달성 (준수한 성능)
+   - Unlabeled data 활용으로 적은 라벨로도 높은 성능 유지
+
+4. **최적 설정**
+   - 20% labeled data 모델이 가장 안정적 (낮은 표준편차)
+   - 임상 적용 시 20% 설정 권장
 
 ---
 
