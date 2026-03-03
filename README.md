@@ -110,7 +110,7 @@ data/Kvasir/
 ├── train/
 │   ├── images/         # RGB polyp 이미지
 │   │   └── *.png
-│   └── masks/          # Binary mask (0: 배경, 255: 폴립)
+│   └── masks/          # Binary mask (0: 배경, 255: 용종)
 │       └── *.png
 └── test/
     ├── images/
